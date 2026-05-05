@@ -71,10 +71,10 @@ class ServerPremium(commands.Cog):
     async def buy_premium(self, ctx):
         embed = discord.Embed(
             title="🌟 Nova Server Premium Plans",
-            description="Scan the QR code to pay. **1 Month (30 Days) = 100 BDT**.",
+            description="Scan the QR code to pay. **1 Month (30 Days) = 100 Rs**.",
             color=discord.Color.gold()
         )
-        embed.add_field(name="💳 Pricing", value="• 1 Month: 100 BDT\n• 3 Months: 300 BDT\n• 6 Months: 600 BDT\n• 1 Year: 1200 BDT", inline=False)
+        embed.add_field(name="💳 Pricing", value="• 1 Month: 100 Rs\n• 3 Months: 300 Rs\n• 6 Months: 600 Rs\n• 1 Year: 1200 Rs", inline=False)
         embed.add_field(name="📝 How to Activate?", value="1. Scan the QR and complete payment.\n2. Click the **Submit TX ID** button below.\n3. Wait for Admin approval.", inline=False)
         embed.set_image(url=self.qr_link)
         await ctx.send(embed=embed, view=BuyPremiumView(self.bot))
