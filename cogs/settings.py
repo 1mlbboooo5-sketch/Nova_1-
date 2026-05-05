@@ -5,53 +5,31 @@ class Settings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command(name="setprefix", description="বটের কাস্টম প্রিফিক্স সেট করো")
+    @commands.hybrid_command(
+        name="setprefix", 
+        description="Set a custom prefix for this server. (Admins only)"
+    )
     @commands.has_permissions(administrator=True)
     async def setprefix(self, ctx, new_prefix: str):
+        # স্পেস ক্লিন করা
         clean_prefix = new_prefix.strip()
+        
+        # MongoDB-তে সেভ করা
         await self.bot.db.guild_settings.update_one(
             {"guild_id": ctx.guild.id},
             {"$set": {"prefix": clean_prefix}},
             upsert=True
         )
-        await ctx.send(f"✅ প্রিফিক্স আপডেট হয়েছে: `{clean_prefix}`। (ডিফল্ট `Nova ` সবসময় কাজ করবে)")
-
-    @commands.Cog.listener()
-    async def on_guild_join(self, guild):
-        owner = guild.owner
-        if owner:
-            embed = discord.Embed(title="Nova - Setup", description="বটের ভাষা সেট করতে নিচের মেনু ব্যবহার করুন।", color=discord.Color.blue())
-            view = LanguageSelectView(self.bot, guild.id)
-            try: await owner.send(embed=embed, view=view)
-            except: pass
-
-class LanguageSelectView(discord.ui.View):
-    def __init__(self, bot, guild_id):
-        super().__init__(timeout=None)
-        self.bot = bot
-        self.guild_id = guild_id
-
-    @discord.ui.select(
-        placeholder="Select Language (১০টি ভাষা)",
-        options=[
-            discord.SelectOption(label="English", value="en", emoji="🇺🇸"),
-            discord.SelectOption(label="Bengali", value="bn", emoji="🇧🇩"),
-            discord.SelectOption(label="Hindi", value="hi", emoji="🇮🇳"),
-            discord.SelectOption(label="Spanish", value="es", emoji="🇪🇸"),
-            discord.SelectOption(label="French", value="fr", emoji="🇫🇷"),
-            discord.SelectOption(label="Arabic", value="ar", emoji="🇸🇦"),
-            discord.SelectOption(label="Japanese", value="ja", emoji="🇯🇵"),
-            discord.SelectOption(label="Russian", value="ru", emoji="🇷🇺"),
-            discord.SelectOption(label="Portuguese", value="pt", emoji="🇵🇹"),
-            discord.SelectOption(label="German", value="de", emoji="🇩🇪"),
-        ]
-    )
-    async def select_callback(self, interaction: discord.Interaction, select):
-        await self.bot.db.guild_settings.update_one(
-            {"guild_id": self.guild_id}, {"$set": {"language": select.values[0]}}, upsert=True
+        
+        # ইংলিশে কনফার্মেশন রিপ্লাই
+        embed = discord.Embed(
+            title="Prefix Updated",
+            description=f"✅ New prefix has been set to: `{clean_prefix}`\n\n"
+                        f"• You can use it like `{clean_prefix}help` or `{clean_prefix} help`.\n"
+                        f"• Default `Nova ` will always work.",
+            color=discord.Color.green()
         )
-        await interaction.response.send_message(f"✅ ভাষা সেট করা হয়েছে: **{select.values[0].upper()}**", ephemeral=True)
+        await ctx.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Settings(bot))
-  
